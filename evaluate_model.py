@@ -13,7 +13,7 @@ def calculate_iou(pred_mask, true_mask, threshold=0.5):
         float: IoU score.
     """
     # Binarize the predicted mask
-    pred_binary = (torch.sigmoid(pred_mask) > threshold).float()  # Binary mask [B, 1, H, W]
+    pred_binary = (pred_mask > threshold).float()  # Binary mask [B, 1, H, W]
 
     # Intersection and Union calculation
     intersection = (pred_binary * true_mask).sum(dim=(1, 2, 3))  # Sum over height and width dimensions
@@ -35,7 +35,7 @@ def calculate_accuracy(pred_mask, true_mask, threshold=0.5):
         float: Pixel-wise accuracy score.
     """
     # Binarize the predicted mask
-    pred_binary = (torch.sigmoid(pred_mask) > threshold).float()  # Binary mask [B, 1, H, W]
+    pred_binary = (pred_mask > threshold).float()  # Binary mask [B, 1, H, W]
 
     # Accuracy calculation
     correct_pixels = (pred_binary == true_mask).sum(dim=(1, 2, 3))
@@ -43,7 +43,7 @@ def calculate_accuracy(pred_mask, true_mask, threshold=0.5):
     accuracy = (correct_pixels / total_pixels).mean().item()  # Average accuracy over the batch
     return accuracy
 
-def evaluate_model(model, dataloader, device):
+def evaluate_model(model, dataloader, device, threshold=0.5):
     """
     Evaluates the model on the provided dataloader using IoU and accuracy metrics.
     
@@ -59,6 +59,7 @@ def evaluate_model(model, dataloader, device):
     model.eval()
     iou_scores = []
     accuracy_scores = []
+    print("In evaluate")
 
     with torch.no_grad():  # Disable gradient calculation for efficiency
         for images, masks in dataloader:
@@ -68,8 +69,8 @@ def evaluate_model(model, dataloader, device):
             predicted_masks = model(images)
 
             # Calculate IoU and accuracy for the batch
-            batch_iou = calculate_iou(predicted_masks, masks)
-            batch_accuracy = calculate_accuracy(predicted_masks, masks)
+            batch_iou = calculate_iou(predicted_masks, masks, threshold)
+            batch_accuracy = calculate_accuracy(predicted_masks, masks, threshold)
 
             iou_scores.append(batch_iou)
             accuracy_scores.append(batch_accuracy)
