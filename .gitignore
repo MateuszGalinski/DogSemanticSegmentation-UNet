@@ -6,3 +6,4 @@ best_model.pth
 *.jpg
 *.png
 *.webp
+*.pth
